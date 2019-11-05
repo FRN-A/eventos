@@ -8,10 +8,12 @@
 
 import UIKit
 import Alamofire
+import AlamofireImage
 
 
 class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSource {
     
+    @IBOutlet weak var tvNombreEvento: UITableView!
     var eventos : [Evento] = []
 
     override func viewDidLoad() {
@@ -27,11 +29,16 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
                             self.eventos.append(nuevoEvento)
                         }
                     }
+                    self.tvNombreEvento.reloadData()
                 }
-            case .failure(let datos):
+            case .failure(_) :
                 print("Algo salió mal")
             }
         }
+    }
+    
+    func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
+        return 161
     }
     
     func numberOfSections(in tableView: UITableView) -> Int {
@@ -46,6 +53,16 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
         let celda = tableView.dequeueReusableCell(withIdentifier: "cellEvento") as? CeldaEventoController
         celda?.lblNombre.text = eventos[indexPath.row].nombre
         celda?.lblFecha.text = eventos[indexPath.row].fecha
+        
+        AF.request(eventos[indexPath.row].urlFlyer).responseImage{
+            response in
+            switch(response.result){
+            case .success(let data) :
+                celda?.imgFlyer.image = data
+            case .failure(_) :
+                print("Algo salió mal")
+            }
+        }
         
         return celda!
     }
